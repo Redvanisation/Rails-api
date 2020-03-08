@@ -2,25 +2,33 @@ require 'set'
 module Api
   class PostsController < ApplicationController
     def index
-      @posts = Post.get_posts('tech')
-      if @posts == 1
-        render @posts
-      elsif @posts == 2
-        render json: { "error": "sortBy parameter is invalid" }, status: :bad_request
-      else
-        render json: @posts
-        # @set = Set.new
-  
-        # @posts.each do |o|
-        #   render json: o
-        #   # render json: 'boooooo'
+      tags = ['tech', 'health', 'startups', 'history', 'design', 'science', 'politics', 'culture']
+      
+      @posts_array = []
+      @set = Set.new
+      @posts = ''
+      
+      tags.each do |tag|
+        @posts = Post.get_posts(tag)
+        break if @posts == 400
         
-        # end
-        # render json: @set
+        @posts_array << @posts['posts']
+        
       end
 
+      @posts_array.each do |section|
+        section.each do |post|
+          @set << post
+        end
+      end
 
-      # debugger
+      if @posts == 400
+        render json: { "error": "sortBy parameter is invalid" }, status: :bad_request
+      else
+        render json: @set
+
+      end
+
     end
   end
 end
